@@ -4,18 +4,18 @@
 API=$(cat ../res/values/donottranslate.xml | grep tmdb_api_key | sed 's/^.*tmdb_api_key">\([^<]*\)<.*$/\1/g')
 
 # all lang except en
-LANG=$(curl -s https://api.themoviedb.org/3/configuration/languages\?api_key=${API} | jq . | grep iso_639_1 | sed 's/^.*"iso_639_1": "\([a-z][a-z]\).*$/\1/g' | grep -v en | sort -u)
+LANG=$(curl -s https://api.tmdb.org/3/configuration/languages\?api_key=${API} | jq . | grep iso_639_1 | sed 's/^.*"iso_639_1": "\([a-z][a-z]\).*$/\1/g' | grep -v en | sort -u)
 
 for lang in $LANG
 do
- curl -s  https://api.themoviedb.org/3/genre/movie/list\?api_key=${API}\&language=${lang} | jq . | grep \"name\": | grep -v null | sed 's/^.*"name": "\([^"]*\)"/\1/g' > result-$lang
+ curl -s  https://api.tmdb.org/3/genre/movie/list\?api_key=${API}\&language=${lang} | jq . | grep \"name\": | grep -v null | sed 's/^.*"name": "\([^"]*\)"/\1/g' > result-$lang
 done
 
 # remove empty translations
 find . -size 0 -print -delete
 
 # en master of all
-curl -s  https://api.themoviedb.org/3/genre/movie/list\?api_key=${API}\&language=en | jq . | sed 's/^.*"id": //g' | sed 's/^.*"name": "\([^"]*\)"/\1/g' | sed "/[]{}[]/d" | sed 'N;s/,\n/|/' > result
+curl -s  https://api.tmdb.org/3/genre/movie/list\?api_key=${API}\&language=en | jq . | sed 's/^.*"id": //g' | sed 's/^.*"name": "\([^"]*\)"/\1/g' | sed "/[]{}[]/d" | sed 'N;s/,\n/|/' > result
 
 # assemble result
 for f in $(ls result-*)
